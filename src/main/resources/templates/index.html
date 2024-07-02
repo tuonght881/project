@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Excel</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            display: block;
+        }
+        .table-fixed {
+            width: 100%;
+        }
+        .table-wrapper {
+            max-height: 500px; /* Chiều cao tối đa của bảng */
+            overflow-y: auto; /* Cho phép cuộn dọc khi bảng vượt quá chiều cao */
+        }
+    .file-input-wrapper {
+        display: inline-block;
+        width: auto; /* Đặt chiều rộng cụ thể */
+    }
+
+    #file {
+        width: 350px; /* Đặt chiều rộng mong muốn */
+        display: inline-block;
+    }
+    .hidden{
+     display: none;
+    }
+	.hinhque {
+	    display: block;
+	    margin-top: 10px; /* Điều chỉnh khoảng cách xuống dưới */
+	    margin-left: auto;
+	    margin-right: auto;
+	    max-width: 100%; /* Đảm bảo hình ảnh không vượt quá chiều rộng của ô */
+	}
+    </style>
+
+</head>
+<body>
+<div class="container mt-4">
+<div class="mt-4">
+    <h3>Tính SĐT</h3>
+        <form id="queForm">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="phoneNumberInput">Nhập số điện thoại</label>
+                <input type="text" id="phoneNumberInput" class="form-control" required onkeypress="if(event.keyCode === 13) calculateQue()" autocomplete="off">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="calculateQue()">Tính toán</button>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="cleanedPhoneNumberInput">Số điện thoại đã làm sạch</label>
+                <input type="text" id="cleanedPhoneNumberInput" class="form-control" readonly>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="que1Input">Quẻ 1</label>
+                <input type="text" id="que1Input" class="form-control" readonly>
+                <div class="hinhque text-center">
+                <img id="que1Image" alt="Quẻ 2" src="" class="hidden">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="que2Input">Quẻ 2</label>
+                <input type="text" id="que2Input" class="form-control" readonly>
+                <div class="hinhque text-center">
+                	<img id="que2Image" alt="Quẻ 1" src="" class="hidden">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 kque">
+            <div class="form-group">
+                <label for="que3Input">Quẻ 3</label>
+                <input type="text" id="que3Input" class="form-control" readonly>
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+    <h2>Tải lên File Excel</h2>
+        <div class="mt-4">
+            <form method="post" enctype="multipart/form-data" action="/upload">
+                <div class="form-group file-input-wrapper">
+                    <label for="file">Chọn File Excel</label>
+                    <input type="file" id="file" name="file" class="form-control-file" required>
+                </div>
+                <div>
+                <button type="submit" class="btn btn-primary">Tải lên</button>
+                </div>
+            </form>
+        </div>
+    <div class="mt-4">
+        <form action="/export" method="get">
+            <h3>Dữ liệu tải lên</h3>
+            <div class="table-wrapper">
+                <table class="table table-bordered table-fixed" id="dataTable">
+                    <thead>
+                    <tr>
+                        <th>SDT</th>
+                        <th>SDT Đã Làm Chuẩn</th>
+                        <th>Quẻ 1</th>
+                        <th>Quẻ 2</th>
+                        <th>Quẻ 3</th>
+                        <th>Quẻ</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row : ${rows}">
+                        <td th:text="${row.sdt}"></td>
+                        <td th:text="${row.cleanedSdt}"></td>
+                        <td th:text="${row.que1}"></td>
+                        <td th:text="${row.que2}"></td>
+                        <td th:text="${row.que3}"></td>
+                        <td th:text="${row.que}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 10px;">
+            	<button class="btn btn-success" id="exportButton">Xuất Excel</button>
+            </div>
+        </form>
+    </div>
+</div>
+    <script src="/js/script.js"></script>
+</body>
+</html>
