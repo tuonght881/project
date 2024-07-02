@@ -1,3 +1,4 @@
+
 // Cập nhật hình ảnh dựa trên kết quả quẻ 1 và quẻ 2
 const que1Image = document.getElementById('que1Image');
 que1Image.src = `/images/que${data.que1}.png`;

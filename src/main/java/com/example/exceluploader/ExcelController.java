@@ -54,27 +54,52 @@ public class ExcelController {
 	
 	@PostMapping("/upload")
 	public String uploadExcelFile(@RequestParam("file") MultipartFile file, Model model) {
-		rows.clear(); // Xóa dữ liệu cũ trước khi tải lên file mới
-		try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
-			Sheet sheet = workbook.getSheetAt(0);
-			//List<RowData> rows = new ArrayList<>();
-			for (int i = 0; i <= sheet.getLastRowNum(); i++) {
-				Row row = sheet.getRow(i);
-				String sdt = getCellValueAsString(row.getCell(0));
-				String cleanedSdt = cleanPhoneNumber(sdt);
-				int que1 = calculateQue(cleanedSdt.substring(0, 5));
-				int que2 = calculateQue(cleanedSdt.substring(5));
-				int que3 = calculateFinalQue(cleanedSdt);
-				String que = Integer.toString(que1) + Integer.toString(que2) + Integer.toString(que3);
+	    rows.clear(); // Xóa dữ liệu cũ trước khi tải lên file mới
+	    List<String> errors = new ArrayList<>(); // Danh sách thông báo lỗi
+	    try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
+	        Sheet sheet = workbook.getSheetAt(0);
 
-				rows.add(new RowData(sdt, cleanedSdt, que1, que2, que3, que));
-			}
-			model.addAttribute("rows", rows);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return "index";
+	        for (int i = 0; i <= sheet.getLastRowNum(); i++) {
+	            Row row = sheet.getRow(i);
+	            if (row == null) {
+	            	errors.add("Hàng trống tại vị trí: " + (i + 1));
+	                continue; // Bỏ qua hàng trống
+	            }
+
+	            String sdt = getCellValueAsString(row.getCell(0));
+
+	            // Kiểm tra nếu ô trống
+	            if (sdt.isEmpty()) {
+	            	errors.add("Ô trống tại hàng: " + (i + 1) + ", cột: 1");
+	                continue; // Bỏ qua ô trống
+	            }
+
+	            String cleanedSdt = cleanPhoneNumber(sdt);
+
+	            // Kiểm tra số điện thoại hợp lệ
+	            if (cleanedSdt.length() < 10) {
+	            	errors.add("Số điện thoại không hợp lệ: hàng " + (i + 1));
+	                continue; // Bỏ qua dòng này nếu số điện thoại không hợp lệ
+	            }
+
+	            int que1 = calculateQue(cleanedSdt.substring(0, 5));
+	            int que2 = calculateQue(cleanedSdt.substring(5));
+	            int que3 = calculateFinalQue(cleanedSdt);
+	            String que = Integer.toString(que1) + Integer.toString(que2) + Integer.toString(que3);
+
+	            rows.add(new RowData(sdt, cleanedSdt, que1, que2, que3, que));
+	        }
+
+	        model.addAttribute("rows", rows);
+	        model.addAttribute("errors", errors); // Thêm danh sách thông báo lỗi vào mô hình
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        errors.add("Lỗi khi đọc file Excel: " + e.getMessage());
+	        model.addAttribute("errors", errors);
+	    }
+	    return "index";
 	}
+
 
 	private String cleanPhoneNumber(String phoneNumber) {
 	    // Loại bỏ tất cả các ký tự không phải là số
@@ -106,7 +131,10 @@ public class ExcelController {
 	}
 
 	private String getCellValueAsString(Cell cell) {
-	    if (cell == null) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        if (cell != null) {
+	            System.out.println("Ô trống tại hàng: " + (cell.getRowIndex() + 1) + ", cột: " + (cell.getColumnIndex() + 1));
+	        }
 	        return "";
 	    }
 
@@ -117,7 +145,7 @@ public class ExcelController {
 	            if (DateUtil.isCellDateFormatted(cell)) {
 	                return cell.getDateCellValue().toString();
 	            } else {
-	                // Check if the numeric cell contains decimal places
+	                // Kiểm tra nếu ô số có chứa phần thập phân hay không
 	                if (cell.getNumericCellValue() % 1 == 0) {
 	                    return String.valueOf((long) cell.getNumericCellValue());
 	                } else {
@@ -127,11 +155,41 @@ public class ExcelController {
 	        case BOOLEAN:
 	            return String.valueOf(cell.getBooleanCellValue());
 	        case FORMULA:
-	            return cell.getCellFormula();
+	            try {
+	                FormulaEvaluator evaluator = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
+	                CellValue cellValue = evaluator.evaluate(cell);
+	                if (cellValue == null) {
+	                    return "";
+	                }
+	                switch (cellValue.getCellType()) {
+	                    case STRING:
+	                        return cellValue.getStringValue();
+	                    case NUMERIC:
+	                        if (DateUtil.isCellDateFormatted(cell)) {
+	                            return cell.getDateCellValue().toString();
+	                        } else {
+	                            if (cellValue.getNumberValue() % 1 == 0) {
+	                                return String.valueOf((long) cellValue.getNumberValue());
+	                            } else {
+	                                return String.valueOf(cellValue.getNumberValue());
+	                            }
+	                        }
+	                    case BOOLEAN:
+	                        return String.valueOf(cellValue.getBooleanValue());
+	                    default:
+	                        return "";
+	                }
+	            } catch (Exception e) {
+	                return cell.getCellFormula();
+	            }
 	        default:
 	            return "";
 	    }
 	}
+
+
+
+
 	static class RowData {
 		private String sdt;
 		private String cleanedSdt;
