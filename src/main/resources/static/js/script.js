@@ -132,11 +132,11 @@ async function calculateQue() {
 
 		// Cập nhật hình ảnh dựa trên kết quả quẻ 1 và quẻ 2
 		const que1Image = document.getElementById('que1Image');
-		que1Image.src = `/images/que${data.que1}.png`;
+		que1Image.src = `/images/que${data.que1 === 0 ? 8 : data.que1}.png`;
 		que1Image.classList.remove('hidden');
 
 		const que2Image = document.getElementById('que2Image');
-		que2Image.src = `/images/que${data.que2}.png`;
+		que2Image.src = `/images/que${data.que2 === 0 ? 8 : data.que2}.png`;
 		que2Image.classList.remove('hidden');
 	} catch (error) {
 		console.error('Lỗi:', error);
