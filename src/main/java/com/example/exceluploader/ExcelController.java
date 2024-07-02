@@ -54,7 +54,7 @@ public class ExcelController {
 	
 	@PostMapping("/upload")
 	public String uploadExcelFile(@RequestParam("file") MultipartFile file, Model model) {
-		//rows.clear(); // Xóa dữ liệu cũ trước khi tải lên file mới
+		rows.clear(); // Xóa dữ liệu cũ trước khi tải lên file mới
 		try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
 			Sheet sheet = workbook.getSheetAt(0);
 			//List<RowData> rows = new ArrayList<>();
