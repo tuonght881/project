@@ -58,7 +58,7 @@ public class ExcelController {
 		try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
 			Sheet sheet = workbook.getSheetAt(0);
 			//List<RowData> rows = new ArrayList<>();
-			for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+			for (int i = 0; i <= sheet.getLastRowNum(); i++) {
 				Row row = sheet.getRow(i);
 				String sdt = getCellValueAsString(row.getCell(0));
 				String cleanedSdt = cleanPhoneNumber(sdt);
