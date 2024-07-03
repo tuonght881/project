@@ -103,35 +103,6 @@ function populateTable(data) {
 	});
 }
 
-document.getElementById('exportButton').addEventListener('click', async () => {
-	try {
-		const data = getDataFromTable(); // Lấy dữ liệu từ bảng
-		const response = await fetch('http://localhost:8080/export', {
-			method: 'POST', // Phương thức POST
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(data) // Gửi dữ liệu lên server dưới dạng JSON
-		});
-
-		if (!response.ok) {
-			throw new Error('Không thể xuất file Excel.');
-		}
-
-		// Nhận file Excel từ server và tải về
-		const blob = await response.blob();
-		const url = window.URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.style.display = 'none';
-		a.href = url;
-		a.download = 'data.xlsx';
-		document.body.appendChild(a);
-		a.click();
-		window.URL.revokeObjectURL(url);
-	} catch (error) {
-		console.error('Lỗi:', error);
-	}
-});
 function getDataFromTable() {
 	const table = document.getElementById('dataTable');
 	const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
