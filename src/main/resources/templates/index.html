@@ -90,20 +90,22 @@
     </div>
     </form>
 </div>
-    <h2>Tải lên File Excel</h2>
+    <h3>Tải lên File Excel</h3>
         <div class="mt-4">
-            <form method="post" enctype="multipart/form-data" action="./upload">
-                <div class="form-group file-input-wrapper">
-                    <label for="file">Chọn File Excel</label>
-                    <input type="file" id="file" name="file" class="form-control-file" required>
-                </div>
-                <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Tải lên</button>
-                </div>
-            </form>
+		    <form id="uploadForm" enctype="multipart/form-data">
+		    <div class="d-flex align-items-center">
+			    <div class="form-group file-input-wrapper">
+			    	<input type="file" id="file" name="file" class="form-control-file" required>
+			    </div>
+		        <div class="d-flex justify-content-end">
+		        	<button type="button" onclick="uploadFile()" class="btn btn-primary">Upload</button>	        
+		        </div>
+		    </div>
+		    </form>
         </div>
     <!-- Hiển thị thông báo lỗi -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11" id="bodyloi">
+<div class="toast-container position-static">
   <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
       <!-- <img class="rounded me-2" alt="..." src=""> -->
@@ -117,8 +119,8 @@
     <div class="toast-body" id="errorList" style="list-style-type: none">
     </div>
   </div>
+  </div>
 </div>
-    
     <div class="mt-4">
         <form action="/export" method="get">
 			<div class="d-flex align-items-center">
@@ -128,6 +130,7 @@
 			    <div class="d-flex justify-content-end">
 			        <button class="btn btn-success" id="exportButton">Xuất Excel</button>
 			    </div>
+			    <div id="result"></div>
 			</div>
             <div class="table-wrapper mt-2">
                 <table class="table table-striped table-fixed" id="dataTable">
@@ -141,15 +144,7 @@
                         <th>Quẻ</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr th:each="row : ${rows}">
-                        <td th:text="${row.sdt}"></td>
-                        <td th:text="${row.cleanedSdt}"></td>
-                        <td th:text="${row.que1}"></td>
-                        <td th:text="${row.que2}"></td>
-                        <td th:text="${row.que3}"></td>
-                        <td th:text="${row.que}"></td>
-                    </tr>
+                    <tbody id="excelDataBody">
                     </tbody>
                 </table>
             </div>
@@ -157,30 +152,8 @@
     </div>
 </div>
     <script src="/js/script.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-<script th:inline="javascript">
-    // Lấy thông tin lỗi từ model hoặc controller
-    const errors = /*[[${errors}]]*/ [];
-    // Kiểm tra nếu có lỗi thì hiển thị toast và thêm các thông báo lỗi vào danh sách
-    $(document).ready(function() {
-        if (errors && errors.length > 0) {
-            const errorList = $('#errorList');
-			
-            // Hiển thị thời gian hiện tại trong toast
-            const currentTime = new Date().toLocaleTimeString();
-            document.getElementById('toastTime').textContent = currentTime;
-
-            // Thêm các thông báo lỗi vào danh sách
-            errors.forEach(error => {
-                errorList.append('<li>' + error + '</li>');
-            });
-            
-            // Hiển thị toast
-            $('#errorToast').toast('show');
-        }
-    });
-</script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>

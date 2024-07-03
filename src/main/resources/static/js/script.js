@@ -10,34 +10,69 @@ que2Image.src = `/images/que${data.que2}.png`;
 que2Image.classList.remove('hidden');
 que2Image.classList.add('que-image'); // Thêm lớp để áp dụng căn chỉnh
 
-document.getElementById('uploadButton').addEventListener('click', async () => {
-	const fileInput = document.getElementById('fileInput');
-	const file = fileInput.files[0];
+function uploadFile() {
+	
+    var form = $('#uploadForm')[0];
+    var data = new FormData(form);
+	// Xử lý thông báo lỗi nếu có
+	//alert("Có lỗi xảy ra khi xử lý file Excel!");
+    $.ajax({
+        type: "POST",
+        enctype: 'multipart/form-data',
+        url: "/upload",
+        data: data,
+        processData: false,
+        contentType: false,
+        cache: false,
+        success: function (response) {
+            var excelDataBody = $('#excelDataBody');
+            excelDataBody.empty();
+			// Xoá danh sách lỗi hiện tại
+			$('#errorList').empty();
+            if (response.errors.length > 0) {
+				//alert(response.errors);
+				const errors = response.errors;
+				response.errors = [];
+				// Kiểm tra nếu có lỗi thì hiển thị toast và thêm các thông báo lỗi vào danh sách
+				$(document).ready(function() {
+				        const errorList = $('#errorList');
+						
+				        // Hiển thị thời gian hiện tại trong toast
+				        const currentTime = new Date().toLocaleTimeString();
+				        document.getElementById('toastTime').textContent = currentTime;
 
-	if (!file) {
-		alert('Please select a file.');
-		return;
-	}
+				        // Thêm các thông báo lỗi vào danh sách
+				        errors.forEach(error => {
+				            errorList.append('<li>' + error + '</li>');
+				        });
+				        
+				        // Hiển thị toast
+				        $('#errorToast').toast('show');
+				});
+            }
 
-	const formData = new FormData();
-	formData.append('file', file);
+            if (response.rows.length > 0) {
+                // Đổ dữ liệu vào bảng từ response.rows
+                response.rows.forEach(row => {
+                    var newRow = '<tr>' +
+                        '<td>' + row.sdt + '</td>' +
+                        '<td>' + row.cleanedSdt + '</td>' +
+                        '<td>' + row.que1 + '</td>' +
+                        '<td>' + row.que2 + '</td>' +
+                        '<td>' + row.que3 + '</td>' +
+                        '<td>' + row.que + '</td>' +
+                        '</tr>';
+                    excelDataBody.append(newRow);
+                });
+            }
+        },
+        error: function (e) {
+            $('#excelDataBody').text("Error: " + e.responseText);
+        }
+    });
+}
 
-	try {
-		const response = await fetch('http://localhost:8080/api/excel/upload', {
-			method: 'POST',
-			body: formData
-		});
 
-		if (!response.ok) {
-			throw new Error('Failed to upload file.');
-		}
-
-		const data = await response.json();
-		populateTable(data);
-	} catch (error) {
-		console.error('Error:', error);
-	}
-});
 function populateTable(data) {
 	const tableHeader = document.getElementById('tableHeader');
 	const tableBody = document.getElementById('tableBody');
