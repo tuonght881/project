@@ -151,17 +151,30 @@ public class ExcelController {
 	}
 	
 	private String cleanPhoneNumber(String phoneNumber) {
-		// Loại bỏ tất cả các ký tự không phải là số
-		String cleanedPhoneNumber = phoneNumber.replaceAll("[^\\d]", "");
+	    // Loại bỏ tất cả các ký tự không phải là số
+	    String cleanedPhoneNumber = phoneNumber.replaceAll("[^\\d]", "");
 
-		// Thêm số 0 vào đầu nếu cần thiết
-		if (cleanedPhoneNumber.length() == 9 && !cleanedPhoneNumber.startsWith("0")) {
-			cleanedPhoneNumber = "0" + cleanedPhoneNumber;
-		} else if (cleanedPhoneNumber.length() < 9) {
-			cleanedPhoneNumber = "0" + cleanedPhoneNumber;
-		}
+	    // Xử lý các trường hợp đặc biệt
+	    if (cleanedPhoneNumber.length() <= 8) {
+	        // Nếu số không bắt đầu bằng số 0, thêm số 0 vào đầu
+	        if (!cleanedPhoneNumber.startsWith("0")) {
+	            cleanedPhoneNumber = "0" + cleanedPhoneNumber;
+	        }
+	        // Thêm số 0 vào phía sau cho đến khi đủ 10 chữ số
+	        while (cleanedPhoneNumber.length() < 10) {
+	            cleanedPhoneNumber += "0";
+	        }
+	    } else if (cleanedPhoneNumber.length() == 9) {
+	        // Nếu số bắt đầu bằng số 0, thêm số 0 vào cuối
+	        if (cleanedPhoneNumber.startsWith("0")) {
+	            cleanedPhoneNumber += "0";
+	        } else {
+	            // Nếu số không bắt đầu bằng số 0, thêm số 0 vào đầu
+	            cleanedPhoneNumber = "0" + cleanedPhoneNumber;
+	        }
+	    }
 
-		return cleanedPhoneNumber;
+	    return cleanedPhoneNumber;
 	}
 
 	private int calculateQue(String part) {
