@@ -24,7 +24,7 @@ import java.util.Map;
 
 @Controller
 public class ExcelController {
-
+	
 	private List<RowData> rows = new ArrayList<>();
 	List<String> errors = new ArrayList<>();
 
@@ -54,6 +54,8 @@ public class ExcelController {
 						continue;
 					}
 
+					Double gia = row.getCell(2).getNumericCellValue();// chỉ lấy cột C
+					
 					String sdt = getCellValueAsString(row.getCell(1));// chỉ lấy cột B
 					if (sdt.isEmpty()) {
 						sdt = getCellValueAsString(row.getCell(0));
@@ -70,7 +72,7 @@ public class ExcelController {
 					int que3 = calculateFinalQue(cleanedSdt);
 					String que = Integer.toString(que1) + Integer.toString(que2) + Integer.toString(que3);
 
-					rows.add(new RowData(sdt, cleanedSdt, que1, que2, que3, que));
+					rows.add(new RowData(sdt, cleanedSdt, que1, que2, que3, que, gia));
 				}
 
 				result.put("rows", rows);
@@ -111,11 +113,15 @@ public class ExcelController {
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> exportToExcel() {
 		try (Workbook workbook = new XSSFWorkbook()) {
+			DataFormat format = workbook.createDataFormat();
+			CellStyle currencyStyle = workbook.createCellStyle();
+			currencyStyle.setDataFormat(format.getFormat("#,##0"));
+			
 			Sheet sheet = workbook.createSheet("Dữ liệu từ bảng");
 
 			// Header của bảng
 			Row headerRow = sheet.createRow(0);
-			String[] tieude = { "SDT", "SDT Đã Làm Chuẩn", "Quẻ 1", "Quẻ 2", "Quẻ 3", "Quẻ" };
+			String[] tieude = { "SDT", "SDT Đã Làm Chuẩn", "Quẻ 1", "Quẻ 2", "Quẻ 3", "Quẻ","Giá"};
 			for (int i = 0; i < tieude.length; i++) {
 				Cell cell = headerRow.createCell(i);
 				cell.setCellValue(tieude[i]);
@@ -131,6 +137,9 @@ public class ExcelController {
 				row.createCell(3).setCellValue(rowData.getQue2());
 				row.createCell(4).setCellValue(rowData.getQue3());
 				row.createCell(5).setCellValue(rowData.getQue());
+				Cell giaCell = row.createCell(6);
+				giaCell.setCellValue(rowData.getGia());
+				giaCell.setCellStyle(currencyStyle);
 			}
 
 			// Chuẩn bị trả về file Excel

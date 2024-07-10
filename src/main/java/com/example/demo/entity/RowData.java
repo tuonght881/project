@@ -7,23 +7,34 @@ public class RowData {
     private int que2;
     private int que3;
     private String que;
+    private Double gia;
 
-    public RowData(String sdt, String cleanedSdt, int que1, int que2, int que3, String que) {
-        this.sdt = sdt;
-        this.cleanedSdt = cleanedSdt;
-        this.que1 = que1;
-        this.que2 = que2;
-        this.que3 = que3;
-        this.que = que;
-    }
+    public RowData(String sdt, String cleanedSdt, int que1, int que2, int que3, String que, Double gia) {
+		super();
+		this.sdt = sdt;
+		this.cleanedSdt = cleanedSdt;
+		this.que1 = que1;
+		this.que2 = que2;
+		this.que3 = que3;
+		this.que = que;
+		this.gia = gia;
+	}
 
-    // Getters and setters
+	// Getters and setters
 
+    public Double getGia() {
+		return gia;
+	}
+
+	public void setGia(Double gia) {
+		this.gia = gia;
+	}
+    
     public String getSdt() {
         return sdt;
     }
 
-    public void setSdt(String sdt) {
+	public void setSdt(String sdt) {
         this.sdt = sdt;
     }
 

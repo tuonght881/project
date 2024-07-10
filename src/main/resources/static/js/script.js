@@ -54,6 +54,7 @@ function uploadFile() {
             if (response.rows.length > 0) {
                 // Đổ dữ liệu vào bảng từ response.rows
                 response.rows.forEach(row => {
+					var formattedGia = formatNumber(row.gia);
                     var newRow = '<tr>' +
                         '<td>' + row.sdt + '</td>' +
                         '<td>' + row.cleanedSdt + '</td>' +
@@ -61,6 +62,7 @@ function uploadFile() {
                         '<td>' + row.que2 + '</td>' +
                         '<td>' + row.que3 + '</td>' +
                         '<td>' + row.que + '</td>' +
+						'<td>' + formattedGia  + '</td>' +
                         '</tr>';
                     excelDataBody.append(newRow);
                 });
@@ -72,7 +74,13 @@ function uploadFile() {
     });
 }
 
-
+function formatNumber(number) {
+    // Kiểm tra xem number có phải là một số hay không
+    if (!isNaN(number)) {
+        return Number(number).toLocaleString('en-US');
+    }
+    return number; // Trả lại giá trị gốc nếu không phải là số
+}
 function populateTable(data) {
 	const tableHeader = document.getElementById('tableHeader');
 	const tableBody = document.getElementById('tableBody');
@@ -101,19 +109,6 @@ function populateTable(data) {
 		});
 		tableBody.appendChild(tr);
 	});
-}
-
-function getDataFromTable() {
-	const table = document.getElementById('dataTable');
-	const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
-	const rows = Array.from(table.querySelectorAll('tbody tr')).map(row => {
-		const rowData = {};
-		Array.from(row.cells).forEach((cell, index) => {
-			rowData[headers[index]] = cell.textContent.trim();
-		});
-		return rowData;
-	});
-	return rows;
 }
 async function calculateQue() {
 	const phoneNumber = document.getElementById('phoneNumberInput').value;
